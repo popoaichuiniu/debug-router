@@ -66,6 +66,8 @@ export type devOption = {
   };
   enableWebSocket?: boolean;
   websocketOption?: {
+    /** IPv4 address advertised to LAN clients. Auto-detected when omitted. */
+    host?: string;
     port?: number;
     roomId?: string;
   };
@@ -118,6 +120,7 @@ export class DebugRouterConnector {
   wssPort: number = DEFAULT_DEV_SERVE_PORT;
   wssHost: string | undefined;
   roomId: string | undefined;
+  private readonly websocketHost: string | undefined;
   wss: WebSocketController | null = null;
   private currentStatus: MultiOpenStatus = MultiOpenStatus.unInit;
   private devicesManager: Set<DeviceManager>;
@@ -154,6 +157,7 @@ export class DebugRouterConnector {
     this.startMonitorMultiOpen();
     this.manualConnect = option.manualConnect;
     this.enableWebSocket = option.enableWebSocket;
+    this.websocketHost = option.websocketOption?.host;
     this.roomId = option.websocketOption?.roomId;
     this.enableAndroid = option.enableAndroid ?? true;
     this.adbOption = option.adbHostPort;
@@ -886,7 +890,9 @@ export class DebugRouterConnector {
 
     const port = this.wssPort;
     this.wssPort = await detectPort(port);
-    const detectionResult = await InternalIpDetector.detectInternalIPv4();
+    const detectionResult = await InternalIpDetector.detectInternalIPv4(
+      this.websocketHost,
+    );
     const wssHost = `${detectionResult.selected.address}:${this.wssPort}`;
     this.wssHost = wssHost;
     getDriverReportService()?.report("websocket_server_init", null, {

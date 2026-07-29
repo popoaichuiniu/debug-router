@@ -60,6 +60,21 @@ await connector.watchNetworkDeviceAtIp({
 
 Each IP is watched once. Repeated calls with the same IP do nothing.
 
+When WebSocket support is enabled, `websocketOption.host` can explicitly set
+the IPv4 address advertised to LAN clients. When omitted, the connector selects
+an active physical LAN interface. Use the explicit host for VPN, hotspot, or
+other virtual-network scenarios.
+
+```js
+const connector = new DebugRouterConnector({
+  manualConnect: true,
+  enableWebSocket: true,
+  websocketOption: {
+    host: "192.168.1.129",
+  },
+});
+```
+
 #### Connection trace (optional)
 Use `connectionTrace` to enable flat JSON-line connection logging, or set `DriverConnectionTracePath` to a file path. Each record includes a monotonically increasing `sequence`; socket-backed records also include `connectionAttemptId` for later trace analysis.
 
